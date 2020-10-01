@@ -5,8 +5,12 @@
 /docker/php-fpm/*
 
 !/docker/database/Dockerfile
+!/docker/database/init.sql
 !/docker/nginx/Dockerfile
 !/docker/nginx/nginx.conf
+!/docker/nginx/conf.d
+!/docker/nginx/sites
+!/docker/logs/
 !/docker/php-fpm/Dockerfile
 !/docker/php-fpm/wait-for-it.sh
 
