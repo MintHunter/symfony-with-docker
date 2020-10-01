@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Element twig{% endblock %}
+
+{% block body %}
+    <div class="container">
+
+<table class="table table-dark">
+    <thead>
+    <tr>
+        <td scope="col">id</td>
+        <td scope="col">title</td>
+        <td scope="col">src</td>
+    </tr>
+    </thead>
+    <tbody>
+    {% if message is defined %}
+        <tr><td>{{ message }} </td></tr>
+    {% endif %}
+        {% if elems is defined %}
+            {% for elem in elems %}
+            <tr>
+                <td scope="row">{{ elem.id }}</td>
+                <td>{{ elem.title }}</td>
+                <td>{{ elem.src }}</td>
+            </tr>
+            {% endfor %}
+        {% endif %}
+    </tbody>
+</table>
+    </div>
+{% endblock %}
