@@ -1,5 +1,5 @@
 .idea
-/docker/database/data
+/docker/database/*
 /docker/logs/*
 /docker/nginx/*
 /docker/php-fpm/*
