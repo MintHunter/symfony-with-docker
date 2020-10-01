@@ -27,6 +27,13 @@ class MovieHTTPRequests
 	{
 		$this->apikey = $apikey;
 	}
+	/**
+	 * @return mixed
+	 */
+	public function getApikey()
+	{
+		return $this->apikey;
+	}
 
 	/**
 	 * @return mixed

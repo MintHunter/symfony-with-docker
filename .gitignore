@@ -1,0 +1,7 @@
+.idea
+/docker/database/data
+/docker/logs/*
+/docker/nginx/*
+/docker/php-fpm/*
+/docker/.env
+
