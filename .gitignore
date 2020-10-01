@@ -3,5 +3,10 @@
 /docker/logs/*
 /docker/nginx/*
 /docker/php-fpm/*
-/docker/.env
+
+!/docker/database/Dockerfile
+!/docker/nginx/Dockerfile
+!/docker/nginx/nginx.conf
+!/docker/php-fpm/Dockerfile
+!/docker/php-fpm/wait-for-it.sh
 
