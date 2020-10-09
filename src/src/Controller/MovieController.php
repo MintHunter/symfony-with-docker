@@ -18,7 +18,7 @@ class MovieController extends AbstractController
 	private $movieData = [];
 	protected $apikey = '15ff7d7c46d28add3e527454709aabfa';
 	/**
-	 * @Route ("/" ,name="movie")
+	 * @Route ("/" ,name="index")
 	 * @param Request $request
 	 * @return Response
 	 */

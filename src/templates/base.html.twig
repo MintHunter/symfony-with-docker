@@ -28,7 +28,7 @@
 <div id="site-content">
     <header class="site-header">
         <div class="container">
-            <a href="{{ path("movie") }}" id="branding">
+            <a href="{{ path("index") }}" id="branding">
                 <img src="{{ asset('web/images/logo.png') }}" alt="" class="logo">
                 <div class="logo-copy">
                     <h1 class="site-title">Company Name</h1>
@@ -39,11 +39,11 @@
             <div class="main-navigation">
                 <button type="button" class="menu-toggle"><i class="fa fa-bars"></i></button>
                 <ul class="menu">
-                    <li class="menu-item current-menu-item"><a href="{{ path("movie") }}">Home</a></li>
-                    <li class="menu-item"><a href="	{{ path("about") }}">About</a></li>
-                    <li class="menu-item"><a href="{{ path("review") }}">Movie reviews</a></li>
-                    <li class="menu-item"><a href="{{ path("join") }}">Join us</a></li>
-                    <li class="menu-item"><a href="{{ path("contacts") }}">Contact</a></li>
+                    <li class="menu-item {% if app.request.get('_route') == 'index' %}current-menu-item{%endif%}"><a href="{{ path("index") }}">Home</a></li>
+                    <li class="menu-item {% if app.request.get('_route') == 'about' %}current-menu-item{%endif%}"><a href="	{{ path("about") }}">About</a></li>
+                    <li class="menu-item {% if app.request.get('_route') == 'review' %}current-menu-item{%endif%}"><a href="{{ path("review") }}">Movie reviews</a></li>
+                    <li class="menu-item {% if app.request.get('_route') == 'join' %}current-menu-item{%endif%}"><a href="{{ path("join") }}">Join us</a></li>
+                    <li class="menu-item {% if app.request.get('_route') == 'contacts' %}current-menu-item{%endif%}"><a href="{{ path("contacts") }}">Contact</a></li>
                 </ul> <!-- .menu -->
 
                 <form action="#" class="search-form">
