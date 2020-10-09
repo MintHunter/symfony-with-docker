@@ -66,6 +66,11 @@ class MovieHTTPRequests
 		$this->serializer = new Serializer([new ObjectNormalizer()]);
 
 	}
+	// database Obj resp -> array
+	function normalizeData($data){
+		return  $this->serializer->normalize($data, null);
+
+	}
 
 	/*
 	 * send request
@@ -111,16 +116,24 @@ class MovieHTTPRequests
 			$column => $name
 		]);
 		if (!is_null($result)) {
-			$body = $this->serializer->normalize($result, null);
+			$body = $this->normalizeData($result);
 			foreach ($body as $key => $item) {
+				$new_key=false;
 				$result = json_decode($item);
-				if (json_last_error() === JSON_ERROR_NONE) {
-					$body[$key] = $result;
+				if(preg_match('/[A-Z]/',$key,$matches)){
+					$new_key = preg_replace('/[A-Z]/', '_'.strtolower($matches[0]), $key);
 				}
-				$body['full_poster_path']['avaible_sizes'] = $this->getImageSizes($body['posterPath'], 'poster');
-				$body['full_backdrop_path']['avaible_sizes'] = $this->getImageSizes($body['backdropPath'], 'backdrop');
+				if (json_last_error() === JSON_ERROR_NONE) {
+					$new_key ==false ? $resp[$key] = $this->normalizeData($result) :  $resp[$new_key] = $this->normalizeData($result) ;
+				}else{
+					$new_key ==false ? $resp[$key] = $item :  $resp[$new_key] = $item;
+
+				}
 			}
-			return $body;
+			$resp['full_poster_path']['avaible_sizes'] = $this->getImageSizes($body['posterPath'], 'poster');
+			$resp['full_backdrop_path']['avaible_sizes'] = $this->getImageSizes($body['backdropPath'], 'backdrop');
+
+			return $resp;
 		} else {
 			return null;
 		}
@@ -225,8 +238,6 @@ class MovieHTTPRequests
 			return $imgSizes;
 
 		}
-
-
 	}
 
 
@@ -249,7 +260,6 @@ class MovieHTTPRequests
 		$lang == null ?$lang='en-EN': $uri .= '&language=' . $lang;
 		$page == null ?: $uri .= '&page=' . $page;
 		$region == null ?: $uri .= '&region=' . $region;
-
 		$body = $this->getBodyRequest($uri);
 		foreach ($body['results'] as $key => $movie) {
 			$body['results'][$key]['full_poster_path']['avaible_sizes'] = $this->getImageSizes($movie['poster_path'], 'poster');
@@ -273,14 +283,29 @@ class MovieHTTPRequests
 		if (is_null($body = $this->findMovieInDatabase('mdb_id', $id))) {
 			$body = $this->getBodyRequest($uri);
 			$this->insertMovieDataInTable($body,$lang);
+			$body['full_poster_path']['avaible_sizes'] = $this->getImageSizes($body['poster_path'], 'poster');
+			$body['full_backdrop_path']['avaible_sizes'] = $this->getImageSizes($body['backdrop_path'], 'backdrop');
 		}
 		return $body;
 	}
-
-	public function discoverMovie($year,$genre){
+	public function discoverMovie($year,$genre,$page,$lang=null){
 		$this->setMethod("GET");
 		$uri = 'discover/movie' ;
 		$uri .= '?api_key=' . $this->getApikey();
+		$lang == null ?$lang='en-EN': $uri .= '&language=' . $lang;
+		$uri .= '&sort_by=popularity.desc';
+		$uri .= '&include_adult=false';
+		$uri .= '&include_video=false';
+		$uri .= '&year=' . $year;
+		$uri .= '&with_genres=' . $genre;
+		$uri .= '&page=' . $page;
+		$body =  $this->getBodyRequest($uri);
+		foreach ($body['results'] as $key => $movie) {
+			$body['results'][$key]['full_poster_path']['avaible_sizes'] = $this->getImageSizes($movie['poster_path'], 'poster');
+			$body['results'][$key]['full_backdrop_path']['avaible_sizes'] = $this->getImageSizes($movie['backdrop_path'], 'backdrop');
+
+		}
+		return $body;
 	}
 
 

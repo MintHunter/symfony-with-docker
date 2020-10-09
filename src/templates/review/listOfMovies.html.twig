@@ -1,0 +1,123 @@
+{% block body %}
+    {% if data is defined %}
+        <div class="movie-list">
+        {%  for movie in data.results %}
+            <div class="movie">
+                <figure class="movie-poster"><a href="/movie/{{ movie.id }}"><img src="{{ movie.full_poster_path.avaible_sizes.w780 }}" alt="#"></a></figure>
+                <div class="movie-title"><a href="/movie/{{ movie.id }}">{{ movie.title }}</a></div>
+                <p>Sed ut perspiciatis unde omnis iste natus error voluptatem doloremque.</p>
+            </div>
+        {% endfor %}
+        </div>
+    {% endif %}
+    <div class="pagination">
+        <span  style="cursor: pointer" class="page-number prev"><i class="fa fa-angle-left"></i></span>
+        {% if total_pages is defined %}
+            {% if data.page>5 %}
+                {% for i in data.page-4..data.page+5 %}
+                    <span data-page="{{ i }}" style="cursor: pointer" class="page-number number {% if i==data.page %} current {% endif %}">{{ i }}</span>
+                {% endfor %}
+                {% else %}
+                    {% for i in 1..data.page+7 %}
+                        <span data-page="{{ i }}" style="cursor: pointer" class="page-number number {% if i==data.page %} current {% endif %}">{{ i }}</span>
+                    {% endfor %}
+            {% endif  %}
+            <span  style="cursor: pointer" class="page-number">...</span>
+        {% endif %}
+        <span  style="cursor: pointer" class="page-number next"><i class="fa fa-angle-right"></i></span>
+    </div>
+
+{% endblock %}
+
+<script>
+    {% block customJs %}
+    $("#genres_select").on('change',function(){
+        genreValue = $("#genres_select").val();
+        $.ajax({
+            method: 'POST',
+            url: "/ajax/reviewFilter",
+            data:{
+                genre:genreValue,
+                year:yearValue,
+                page:page,
+            },
+            success: function(data){
+                $('.content').html(data);
+            }
+        });
+    });
+    $("#year_select").on('change',function(){
+        yearValue = $("#year_select").val();
+        $.ajax({
+            method: 'POST',
+            url: "/ajax/reviewFilter",
+            data:{
+                genre:genreValue,
+                year:yearValue,
+                page:page,
+            },
+            success: function(data){
+                $('.content').html(data);
+            }
+        });
+    });
+    $('.number').on('click',function (e){
+        page = e.currentTarget.innerText;
+        $('.number').removeClass('current');
+        $('.number[data-page='+page+']').addClass('current');
+        $.ajax({
+            method: 'POST',
+            url: "/ajax/reviewFilter",
+            data:{
+                genre:genreValue,
+                year:yearValue,
+                page:page,
+            },
+            success: function(data){
+                $('.content').html(data);
+            }
+        });
+    });
+    $('.prev').on('click',function (e){
+        if (page!=1) {
+            page--;
+            $('.number').removeClass('current');
+            $('.number[data-page='+page+']').addClass('current');
+            $.ajax({
+                method: 'POST',
+                url: "/ajax/reviewFilter",
+                data:{
+                    genre:genreValue,
+                    year:yearValue,
+                    page:page,
+                },
+                success: function(data){
+                    $('.content').html(data);
+                }
+            });
+        }
+
+    });
+    $('.next').on('click',function (e){
+        if (page!=$('.number').length) {
+            page++;
+            $('.number').removeClass('current');
+            $('.number[data-page='+page+']').addClass('current');
+            $.ajax({
+                method: 'POST',
+                url: "/ajax/reviewFilter",
+                data:{
+                    genre:genreValue,
+                    year:yearValue,
+                    page:page,
+                },
+                success: function(data){
+                    $('.content').html(data);
+                }
+            });
+        }
+
+    });
+    {% endblock %}
+</script>
+

@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Entity\Genres;
 use MovieHTTPRequests;
 use function GuzzleHttp\Psr7\str;
 
@@ -15,7 +16,7 @@ use function GuzzleHttp\Psr7\str;
 class MovieController extends AbstractController
 {
 	private $movieData = [];
-	private $apikey = '15ff7d7c46d28add3e527454709aabfa';
+	protected $apikey = '15ff7d7c46d28add3e527454709aabfa';
 	/**
 	 * @Route ("/" ,name="movie")
 	 * @param Request $request
@@ -57,37 +58,39 @@ class MovieController extends AbstractController
 	public function detail(Request $request){
 		$client = new MovieHTTPRequests($this->apikey,$this->getDoctrine());
 		$this->movieData = $client->getMovie($request->get('movie_id'));
-//		$date = explode('-',$this->movieData['release_date']);
-//		$category = '';
-//		foreach ($this->movieData['genres'] as $key=>$genre){
-//			$category.=$genre['name'].'/';
-//			if ($key==6){break;}
-//		}
+    	$date = explode('-',$this->movieData['release_date']);
+    	$category = '';
+    	foreach ($this->movieData['genres'] as $key=>$genre){
+    		$category.=$genre['name'].'/';
+    		if ($key==6){break;}
+    	}
 		return $this->render('movies/detail.html.twig', [
 			'controller_name' => 'MovieController',
 			'movie' =>$this->movieData,
-			/*'rating'=>floor($this->movieData['vote_average']*(2*1.5)),
+			'rating'=>floor($this->movieData['vote_average']*(2*1.5)),
 			'date' => date("d M Y", mktime(0, 0, 0, $date[2], $date[1], $date[0])),
 			'category'=>$category,
-			'year_for_player' =>$date[0]*/
+			'year_for_player' =>$date[0]
 		]);
 	}
 	/**
-	 * @Route ("/review/{test?}",name="review")
-	 * @param Request $request
+	 * @Route ("/review/",name="review")
 	 * @return Response
 	 */
-	public function review(Request $request)
+	public function review()
 	{
-	/*
-	создать filter.php класс который будет юзать MovieHTTPRequest , и на который будут отдаваться ajax запросы для фильтрации
+		$httpReq = new MovieHTTPRequests($this->apikey,$this->getDoctrine());
+		$repository = $this->getDoctrine()->getRepository(Genres::class);
+		$data = $repository->findAll();
+		$genres = $httpReq->normalizeData($data);
 
+		$this->movieData = $httpReq->discoverMovie('2020','28','1');
 
-	$param['genre'] =$request->get('genre');
-		$param['year'] =$request->get('year');*/
 		return $this->render('review/index.html.twig', [
 			'controller_name' => 'MovieController',
-			'movies'=>$request
+			'genres'=>$genres,
+			'data'=>$this->movieData,
+			'total_pages'=>$this->movieData['total_pages'],
 		]);
 	}
 
