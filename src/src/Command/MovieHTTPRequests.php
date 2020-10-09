@@ -59,7 +59,7 @@ class MovieHTTPRequests
 		);
 		$this->movieDB = new MovieDataBase();
 		$this->setApikey($apikey);
-		$this->getConfiguration();
+		$this->getConfiguration(); // for images
 		$this->doctraine = $doctraine;
 		$this->em = $this->doctraine->getManager();
 		/*convert entity obj to array*/
@@ -84,7 +84,15 @@ class MovieHTTPRequests
 
 		);
 		$body = $response->getBody();
-		return json_decode($body->getContents(), true);
+		$resp =json_decode($body->getContents(), true);
+		if (isset($resp['results']) && count($resp['results'])>0) {
+			foreach ($resp['results'] as $key => $movie) {
+				$resp['results'][$key]['full_poster_path']['avaible_sizes'] = $this->getImageSizes($movie['poster_path'], 'poster');
+				$resp['results'][$key]['full_backdrop_path']['avaible_sizes'] = $this->getImageSizes($movie['backdrop_path'], 'backdrop');
+
+			}
+		}
+		return $resp;
 	}
 
 	/*
@@ -260,13 +268,7 @@ class MovieHTTPRequests
 		$lang == null ?$lang='en-EN': $uri .= '&language=' . $lang;
 		$page == null ?: $uri .= '&page=' . $page;
 		$region == null ?: $uri .= '&region=' . $region;
-		$body = $this->getBodyRequest($uri);
-		foreach ($body['results'] as $key => $movie) {
-			$body['results'][$key]['full_poster_path']['avaible_sizes'] = $this->getImageSizes($movie['poster_path'], 'poster');
-			$body['results'][$key]['full_backdrop_path']['avaible_sizes'] = $this->getImageSizes($movie['backdrop_path'], 'backdrop');
-
-		}
-		return $body;
+		return $this->getBodyRequest($uri);
 
 	}
 
