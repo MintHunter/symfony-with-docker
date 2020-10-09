@@ -47,9 +47,15 @@
                 </ul> <!-- .menu -->
 
                 <form action="#" class="search-form">
-                    <input type="text" placeholder="Search...">
+                    <input type="text" id='search-input' placeholder="Search...">
                     <button><i class="fa fa-search"></i></button>
+
                 </form>
+                <div class="row"></div>
+                <div class="col-md-3 col-md-push-3" id="search-place">
+
+                </div>
+
             </div> <!-- .main-navigation -->
 
             <div class="mobile-navigation"></div>
@@ -150,6 +156,23 @@
     <script src="{{ asset('web/js/app.js')}}"></script>
 {% endblock %}
 {% block customJs %}
+{% endblock %}
+{% block SearchAjax %}
+    <script>
+        $('.search-form').on('submit', (e) => {
+                let value = $('#search-input').val();
+                $.ajax({
+                    method: 'POST',
+                    url: "/ajax/search",
+                    data:{
+                        name: value
+                    },
+                    success: function(data){
+                        $('#search-place').html(data);
+                    }
+                });
+        });
+    </script>
 {% endblock %}
 </body>
 </html>

@@ -61,7 +61,7 @@ class MovieController extends AbstractController
     	$date = explode('-',$this->movieData['release_date']);
     	$category = '';
     	foreach ($this->movieData['genres'] as $key=>$genre){
-    		$category.=$genre['name'].'/';
+    		$category.=$client->getGenre($genre)['genreName'].'/';
     		if ($key==6){break;}
     	}
 		return $this->render('movies/detail.html.twig', [
@@ -70,7 +70,7 @@ class MovieController extends AbstractController
 			'rating'=>floor($this->movieData['vote_average']*(2*1.5)),
 			'date' => date("d M Y", mktime(0, 0, 0, $date[2], $date[1], $date[0])),
 			'category'=>$category,
-			'year_for_player' =>$date[0]
+			'year_for_player' =>$date[0],
 		]);
 	}
 	/**
@@ -90,7 +90,7 @@ class MovieController extends AbstractController
 			'controller_name' => 'MovieController',
 			'genres'=>$genres,
 			'data'=>$this->movieData,
-			'total_pages'=>$this->movieData['total_pages'],
+			//'total_pages'=>$this->movieData['total_pages'],
 		]);
 	}
 

@@ -72,28 +72,6 @@ class MovieHTTPRequests
 
 	}
 
-	/*
-	 * send request
-	 */
-	public function getBodyRequest($uri)
-	{
-
-		$response = $this->client->request(
-			$this->getMethod(),
-			$uri
-
-		);
-		$body = $response->getBody();
-		$resp =json_decode($body->getContents(), true);
-		if (isset($resp['results']) && count($resp['results'])>0) {
-			foreach ($resp['results'] as $key => $movie) {
-				$resp['results'][$key]['full_poster_path']['avaible_sizes'] = $this->getImageSizes($movie['poster_path'], 'poster');
-				$resp['results'][$key]['full_backdrop_path']['avaible_sizes'] = $this->getImageSizes($movie['backdrop_path'], 'backdrop');
-
-			}
-		}
-		return $resp;
-	}
 
 	/*
 	 * API config for images
@@ -113,7 +91,55 @@ class MovieHTTPRequests
 		$this->config = json_decode($body->getContents(), true);
 		return $this->config;
 	}
+	/*
+	 * send request
+ 	*/
+	public function getBodyRequest($uri)
+	{
 
+		$response = $this->client->request(
+			$this->getMethod(),
+			$uri
+
+		);
+		$body = $response->getBody();
+		$resp =json_decode($body->getContents(), true);
+		if (isset($resp['results']) && count($resp['results'])>0) {
+			foreach ($resp['results'] as $key => $movie) {
+				$resp['results'][$key]['full_poster_path']['avaible_sizes'] = $this->getImageSizes($movie['poster_path'], 'poster');
+				$resp['results'][$key]['full_backdrop_path']['avaible_sizes'] = $this->getImageSizes($movie['backdrop_path'], 'backdrop');
+
+			}
+		}
+		return $resp;
+	}
+	/*
+	 * get images
+	 * need path to image
+	 * and img type backdrop, logo, poster, profile, still
+	*/
+	public function getImageSizes($apiPath, $imageType)
+	{
+		$err = false;
+		$imgSizes = [];
+		foreach ($this->config['images'] as $key => $sizes) {
+			if (preg_match('/' . $imageType . '_sizes/', $key)) {
+				foreach ($sizes as $sizeKey => $size) {
+					$imgSizes[$size] = $this->config['images']['base_url'] . $size . $apiPath;
+				}
+				$err = false;
+				break;
+			} else {
+				$err = "No such type found,\n Available types: backdrop, logo, poster, profile, still";
+			}
+		}
+		if ($err) {
+			return $err;
+		} else {
+			return $imgSizes;
+
+		}
+	}
 	/*
 	finds movies and converts them to array
 	*/
@@ -150,34 +176,44 @@ class MovieHTTPRequests
 	public function insertMovieDataInTable($body,$lang=null)
 	{
 		if(is_null($lang)){$lang='en-EN';}
-		$this->movieDB->setAdult($body['adult']);
-		$this->movieDB->setBackdropPath($body['backdrop_path']);
-		$this->movieDB->setBelongsToCollection(json_encode($body['belongs_to_collection']));
-		$this->movieDB->setBudget($body['budget']);
-		$this->movieDB->setGenres(json_encode($body['genres']));
-		$this->movieDB->setHomepage($body['homepage']);
-		$this->movieDB->setMdbId($body['id']);
-		$this->movieDB->setImdbId($body['imdb_id']);
-		$this->movieDB->setOriginalLanguage($body['original_language']);
-		$this->movieDB->setOriginalTitle($body['original_title']);
-		$this->movieDB->setOverview($body['overview']);
-		$this->movieDB->setPopularity($body['popularity']);
-		$this->movieDB->setPosterPath($body['poster_path']);
-		$this->movieDB->setProductionCompanies(json_encode($body['production_companies']));
-		$this->movieDB->setProductionCountries(json_encode($body['production_countries']));
-		$this->movieDB->setReleaseDate($body['release_date']);
-		$this->movieDB->setRevenue($body['revenue']);
-		$this->movieDB->setRuntime($body['runtime']);
-		$this->movieDB->setSpokenLanguages(json_encode($body['spoken_languages']));
-		$this->movieDB->setStatus($body['status']);
-		$this->movieDB->setTagline($body['tagline']);
-		$this->movieDB->setTitle($body['title']);
-		$this->movieDB->setVideo($body['video']);
-		$this->movieDB->setVoteAverage($body['vote_average']);
-		$this->movieDB->setVoteCount($body['vote_count']);
+		!isset($body['adult']) ? : $this->movieDB->setAdult($body['adult']);
+		!isset($body['backdrop_path']) ? : $this->movieDB->setBackdropPath($body['backdrop_path']);
+		!isset($body['belongs_to_collection']) ? : $this->movieDB->setBelongsToCollection(json_encode($body['belongs_to_collection']));
+		!isset($body['budget']) ? : $this->movieDB->setBudget($body['budget']);
+		if (isset($body['genres'])) {
+			$genre_ids = array();
+			foreach ($body['genres'] as $key => $genre){
+			$genre_ids[$key] = $genre['id'];
+		}
+			$body['genres']= $genre_ids;
+		}elseif (isset($body['genre_ids'])){
+			$body['genres'] = $body['genre_ids'];
+		}
+		!isset($body['genres']) ? : $this->movieDB->setGenres(json_encode($body['genres']));
+		!isset($body['homepage']) ? : $this->movieDB->setHomepage($body['homepage']);
+		!isset($body['id']) ? : $this->movieDB->setMdbId($body['id']);
+		!isset($body['imdb_id']) ? : $this->movieDB->setImdbId($body['imdb_id']);
+		!isset($body['original_language']) ? : $this->movieDB->setOriginalLanguage($body['original_language']);
+		!isset($body['original_title']) ? : $this->movieDB->setOriginalTitle($body['original_title']);
+		!isset($body['overview']) ? : $this->movieDB->setOverview($body['overview']);
+		!isset($body['popularity']) ? : $this->movieDB->setPopularity($body['popularity']);
+		!isset($body['poster_path']) ? : $this->movieDB->setPosterPath($body['poster_path']);
+		!isset($body['production_companies']) ? : $this->movieDB->setProductionCompanies(json_encode($body['production_companies']));
+		!isset($body['production_countries']) ? : $this->movieDB->setProductionCountries(json_encode($body['production_countries']));
+		!isset($body['release_date']) ? : $this->movieDB->setReleaseDate($body['release_date']);
+		!isset($body['revenue']) ? : $this->movieDB->setRevenue($body['revenue']);
+		!isset($body['runtime']) ? : $this->movieDB->setRuntime($body['runtime']);
+		!isset($body['spoken_languages']) ? : $this->movieDB->setSpokenLanguages(json_encode($body['spoken_languages']));
+		!isset($body['status']) ? : $this->movieDB->setStatus($body['status']);
+		!isset($body['tagline']) ? : $this->movieDB->setTagline($body['tagline']);
+		!isset($body['title']) ? : $this->movieDB->setTitle($body['title']);
+		!isset($body['video']) ? : $this->movieDB->setVideo($body['video']);
+		!isset($body['vote_average']) ? : $this->movieDB->setVoteAverage($body['vote_average']);
+		!isset($body['vote_count']) ? : $this->movieDB->setVoteCount($body['vote_count']);
 		$this->movieDB->setLanguageVersion($lang); //
 		$this->em->persist($this->movieDB);
 		$this->em->flush();
+		$this->em->clear();
 
 	}
 
@@ -218,37 +254,18 @@ class MovieHTTPRequests
 
 		return $response;
 	}
-
-
-	/*
-	 * get images
-	 * need path to image
-	 * and img type backdrop, logo, poster, profile, still
-	*/
-	public function getImageSizes($apiPath, $imageType)
-	{
-		$err = false;
-		$imgSizes = [];
-		foreach ($this->config['images'] as $key => $sizes) {
-			if (preg_match('/' . $imageType . '_sizes/', $key)) {
-				foreach ($sizes as $sizeKey => $size) {
-					$imgSizes[$size] = $this->config['images']['base_url'] . $size . $apiPath;
-				}
-				$err = false;
-				break;
-			} else {
-				$err = "No such type found,\n Available types: backdrop, logo, poster, profile, still";
-			}
-		}
-		if ($err) {
-			return $err;
-		} else {
-			return $imgSizes;
-
+	public function getGenre($genre_id){
+		$repository = $this->doctraine->getRepository(Genres::class);
+		$result = $repository->findOneBy([
+			'genre_id' => $genre_id
+		]);
+		if (!is_null($result)) {
+			return  $this->normalizeData($result);
+		}else{
+			$this->updateGenresTable();
+			return $result['err']='genres table was updated';
 		}
 	}
-
-
 	/*one latest movie*/
 	public function getLatest($lang = null)
 	{
@@ -301,12 +318,30 @@ class MovieHTTPRequests
 		$uri .= '&year=' . $year;
 		$uri .= '&with_genres=' . $genre;
 		$uri .= '&page=' . $page;
-		$body =  $this->getBodyRequest($uri);
+		$body =  $this->getBodyRequest($uri);  													// условия перепутаны местами см getMovie()
 		foreach ($body['results'] as $key => $movie) {
-			$body['results'][$key]['full_poster_path']['avaible_sizes'] = $this->getImageSizes($movie['poster_path'], 'poster');
-			$body['results'][$key]['full_backdrop_path']['avaible_sizes'] = $this->getImageSizes($movie['backdrop_path'], 'backdrop');
+			if (is_null($resp = $this->findMovieInDatabase('mdb_id', $movie['id']))) { 	// для мульти серча нужнен другой функционал
+				$this->insertMovieDataInTable($movie);											// добавить в бд столбец с нумерацией страницы
+				$body['results'][$key]['fromDataBase']  = $movie ;
+			}
 
 		}
+		return $body;
+	}
+
+	public function searchMovie($name,$lang=null){
+		$this->setMethod("GET");
+		$uri = 'search/movie' ;
+		$uri .= '?api_key=' . $this->getApikey();
+		$lang == null ?$lang='en-EN': $uri .= '&language=' . $lang;
+		$uri .= '&query='.$name;
+		$body =  $this->getBodyRequest($uri);													// условия перепутаны местами см getMovie()
+		//foreach ($body['results'] as $key => $movie) {
+			//if (is_null($body = $this->findMovieInDatabase('mdb_id', $movie['id']))) {   //для мульти серча нужнен другой функционал
+			//	$this->insertMovieDataInTable($movie);											// добавить в бд столбец с нумерацией страницы, для отслеживания групп фильмов
+			//}
+
+		//}
 		return $body;
 	}
 

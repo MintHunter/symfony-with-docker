@@ -1,0 +1,7 @@
+{% block body %}
+    {% if data is defined %}
+        {% for movie in data.results %}
+            <a href="/movie/{{ movie.id }}" style="display: block">{{ movie.title }}</a>
+        {% endfor %}
+    {% endif %}
+{% endblock %}
